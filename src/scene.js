@@ -1,15 +1,11 @@
 "use strict";
 
 
-////////////////////////////////////////
-/// PROBLEMES EN COURS///
-// Lorsqu'on est en mode 3D, pour visualiser le zoom, il faut bouger la souris. Le zoom, avec sours statique ne fonctionne pas.
-
-/////////////////////////////////////////////////////////////////////////////////////////////////
-///    INITIALISATION SCENE   ////
+///    INITIALIZING THE SCENE   ////
 
 
-// Met à jour les paramètres de la scène en fonction des valeurs de l'interface
+// Initializing the parameters of the scene from the parameters of the interface
+
 function updatedGui(guiParam,sceneThreeJs) {
       if(step1){
             if (move){
@@ -77,31 +73,26 @@ gui.add( interfaceData,'numberWings',0,10).step(1).onChange(updateFunc);
 gui.addColor(interfaceData, 'color').onChange(updateFunc);
 
 
-// Les données associées au picking
+// Picking data
 const pickingData = {
-    enabled: false,           // Mode picking en cours ou désactivé (CTRL enfoncé)
-    selectableObjects: [],    // Les objets selectionnables par picking
-    selectedObject: null,     // L'objet actuellement selectionné
-    selectedPlane: {p:null,n:null}, // Le plan de la caméra au moment de la selection. Plan donné par une position p, et une normale n.
+    enabled: false,           // Wether picking is activated (CTRL key)
+    selectableObjects: [],    
+    selectedObject: null,     
+    selectedPlane: {p:null,n:null}, // Plane of the camera during the selection. Given by position and vector n.
 }
-var pickingShape;//Forme du solide à creuser
-var sculptureRange =0.1;//rayon de la sphère à creuser
-var sculptureLong = 0.5;//Longueur du pavé à creuser
-var sculptureLarg = 0.3;//Largeur du pavé à creuser
-var sculptureHaut = 0.1;//Hauteur du pavé à creuser
+var pickingShape;// Shape of the digging object
+var sculptureRange =0.1;
+var sculptureLong = 0.5;
+var sculptureLarg = 0.3;
+var sculptureHaut = 0.1;
 const transMat = new THREE.MeshLambertMaterial({color:0xff0000,transparent:true,opacity:0.4});
-//Pour une sphère
-//pickingShape = new THREE.Mesh(primitive.Sphere(Vector3(0,0,0),sculptureRange),transMat );
-//Pour un pavé
+
 pickingShape = new THREE.Mesh(primitive.Cube(Vector3(0,0,0),sculptureLong,sculptureHaut,sculptureLarg),transMat );
 pickingShape.name = "pickingShape";
 pickingShape.visible = false;
 sceneGraph.add(pickingShape);
 
-// Creation d'un lanceur de rayon (ray caster) de Three.js pour le calcul de l'intersection entre un objet et un rayon
 const raycaster = new THREE.Raycaster();
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -144,7 +135,7 @@ var imax2;
 var cockpitScale;
 var engineScale;
 
-//Données associées aux cables
+//Cable data
 var points1 = [];
 var points2 = [];
 var nextPoints1 = [];
@@ -178,7 +169,7 @@ var stabilize2 = false;
 var timestart2 = 0;
 var sceneThreeJs;
 var tmeteor=0;
-//Fin des données associées aux cables
+//End of cable data
 
 var allObjects;
 const metalMat = new THREE.MeshStandardMaterial({metalness:0.7,roughness:0.5});
@@ -233,49 +224,9 @@ function onMouseDown(event) {
         yp+=(-1/20)*yn;
         zp+=(-1/20)*zn;
 
+// Projection
 
-        //PROJECTION SUR LA SPHERE
-        // if( (x-xp)*(x-xp) + (y-yp)*(y-yp) + (z-zp)*(z-zp) <=sculptureRange*sculptureRange){
-        //   var translatevector = Vector3(x-xp,y-yp,z-zp).normalize();
-        //   var tx = sculptureRange*translatevector.x;
-        //   var ty = sculptureRange*translatevector.y;
-        //   var tz = sculptureRange*translatevector.z;
-        //   var vector = new THREE.Vector3( xp+tx,yp+ty,zp+tz );
-        //   vectorlist[i] = vector;
-        // }
-
-        // //PROJECTION SUR UN PAVE
-        //   var nx;
-        //   var ny;
-        //   var nz;
-        // if(x>xp-sculptureLong/2&&x<xp+sculptureLong/2 && y>yp-sculptureHaut/2&&y<yp+sculptureHaut/2 && z>zp-sculptureLarg/2&&z<zp+sculptureLarg/2){
-        //   var translatevector = Vector3(x-xp,y-yp,z-zp).normalize();
-        //   var amplitudeMin = Math.min(sculptureHaut,sculptureLarg,sculptureLong);
-        //   var amplitudeMax = Math.max(sculptureHaut,sculptureLarg,sculptureLong);
-        //   var tx = translatevector.x;
-        //   var ty = translatevector.y;
-        //   var tz = translatevector.z;
-        //   nx = xp + amplitudeMin*tx;
-        //   ny = yp + amplitudeMin*ty;
-        //   nz = zp + amplitudeMin*tz;
-        //   while(!((nx>xp-sculptureLong/2-0.001*(amplitudeMax-amplitudeMin)*tx && nx<xp-sculptureLong/2+0.001*(amplitudeMax-amplitudeMin)*tx)
-        //     ||(nx>xp+sculptureLong/2-0.001*(amplitudeMax-amplitudeMin)*tx && nx<xp+sculptureLong/2+0.001*(amplitudeMax-amplitudeMin)*tx)
-        //     ||(ny>yp-sculptureHaut/2-0.001*(amplitudeMax-amplitudeMin)*ty && ny>yp-sculptureHaut/2+0.001*(amplitudeMax-amplitudeMin)*ty)
-        //     ||(ny>yp+sculptureHaut/2-0.001*(amplitudeMax-amplitudeMin)*ty && ny>yp+sculptureHaut/2+0.001*(amplitudeMax-amplitudeMin)*ty)
-        //     ||(nz>zp-sculptureLarg/2-0.001*(amplitudeMax-amplitudeMin)*tz && nz>zp-sculptureLarg/2+0.001*(amplitudeMax-amplitudeMin)*tz)
-        //     ||(nz>zp+sculptureLarg/2-0.001*(amplitudeMax-amplitudeMin)*tz && nz>zp+sculptureLarg/2+0.001*(amplitudeMax-amplitudeMin)*tz)
-        //     )){
-        //     nx = nx + 0.001*(amplitudeMax-amplitudeMin)*tx;
-        //     ny = ny + 0.001*(amplitudeMax-amplitudeMin)*ty;
-        //     nz = nz + 0.001*(amplitudeMax-amplitudeMin)*tz;
-        //   }
-        //
-        //   var vector = new THREE.Vector3( nx,ny,nz );
-        //   vectorlist[i] = vector;
-        // }
-
-        //PROJECTION SUR UN PAVE
-        var ny;
+          var ny;
         if(x>xp-sculptureLong/2&&x<xp+sculptureLong/2 && y>yp-sculptureHaut/2&&y<yp+sculptureHaut/2 && z>zp-sculptureLarg/2&&z<zp+sculptureLarg/2){
           if(yp>=y-sculptureHaut/2){
             ny = yp-sculptureHaut/2;
@@ -545,7 +496,7 @@ function onMouseMove(event) {
 
         if(pickingData.enabled && controlDown){
 
-          // Coordonnées du clic de souris
+          // Click coordinates
           const xPixel = event.clientX;
           const yPixel = event.clientY;
 
@@ -555,29 +506,28 @@ function onMouseMove(event) {
           const x =  2*xPixel/windowW-1;
           const y = -2*yPixel/windowH+1;
 
-          // Calcul d'un rayon passant par le point (x,y)
-          //  c.a.d la direction formé par les points p de l'espace tels que leurs projections sur l'écran par la caméra courante soit (x,y).
+          // Radius going through (x,y) point
           raycaster.setFromCamera(new THREE.Vector2(x,y), camera);
 
-          // Calcul des interections entre le rayon et les objets passés en paramètres
+          // Interections between radius and parameter objects
           const intersects = raycaster.intersectObjects( pickingData.selectableObjects );
 
           const nbrIntersection = intersects.length;
           if (nbrIntersection==0){pickingShape.visible = false;}
           if( nbrIntersection>0 ) {
 
-              // Les intersections sont classés par distance le long du rayon. On ne considère que la première.
+              // Intersections sorting
               const intersection = intersects[0];
 
-              // Sauvegarde des données du picking
-              pickingData.selectedObject = intersection.object; // objet selectionné
-              pickingData.selectedPlane.p = intersection.point.clone(); // coordonnées du point d'intersection 3D
-              pickingData.selectedPlane.n = camera.getWorldDirection().clone(); // normale du plan de la caméra
+              // Picking data storage
+              pickingData.selectedObject = intersection.object; // Selected object
+              pickingData.selectedPlane.p = intersection.point.clone(); // Intersection point coordinates
+              pickingData.selectedPlane.n = camera.getWorldDirection().clone(); // Normal vevtor
 
 
-              // Affichage de la selection
+
               pickingShape.visible = true;
-              pickingShape.position.set( pickingData.selectedPlane.p.x,pickingData.selectedPlane.p.y,pickingData.selectedPlane.p.z ); //position de la sphere
+              pickingShape.position.set( pickingData.selectedPlane.p.x,pickingData.selectedPlane.p.y,pickingData.selectedPlane.p.z ); // Shpere position
 
           }
 
@@ -1030,7 +980,7 @@ function onKeyDown(event){
             geom = new THREE.Geometry();
 
 
-            //On crée une forme triangulée
+            //Triangle shape
             const curveShape = new THREE.Shape( vectorPointsCenter2 );
             shapegeom = new THREE.ShapeGeometry( curveShape );
             const object3 = new THREE.Mesh( shapegeom, MaterialRGB(0.2,0.2,0.2) ) ;
@@ -1039,7 +989,7 @@ function onKeyDown(event){
 
 
 
-            //On wrape les sommets du profil en respectant le dessin de la section de face
+            // Vertices wrapping
             vectorlist = [];
             var nbtranches = 100;
             var nbtranchesreel = 0;
@@ -1111,18 +1061,7 @@ function onKeyDown(event){
                 geom.faces.push(f1);
                 faceslist.push(f1);
               }
-              // nbf = geom.faces.length;
-              // for(var i=0; i<nbf; i++){
-              //   var f1 = new THREE.Face3(geom.faces[i].a+nbv, geom.faces[i].c+nbv, geom.faces[i].b+nbv);
-              //   geom.faces.push(f1);
-              // }
 
-              // for(let i=0; i<vectorPoints.length-1; i++){
-              //   var f1 = new THREE.Face3((n-1)*m+i, (0)*m+i, (n-1)*m+i+1)
-              //   var f2 = new THREE.Face3((n-1)*m+i+1, (0)*m+i, (0)*m+i+1)
-              //   geom.faces.push(f1);
-              //   geom.faces.push(f2);
-              // }
             geom.computeVertexNormals();
 
             object = new THREE.Mesh( geom, metalMat );
@@ -1142,8 +1081,6 @@ function onKeyDown(event){
 
         if(event.key=="Enter" && move){
             pickingData.enabled = false;
-            // step2=false;
-            // step3=true;
 
 
             var newscale = cockpitScale/engineScale;
@@ -1155,7 +1092,7 @@ function onKeyDown(event){
             object1.position.set(2*cockpitScale,0,4*ymax);
             object2.position.set(2*cockpitScale,0,-4*ymax);
 
-            //Positionnement du câble 1
+            //Cable 1
             var a1 = Vector3(2*cockpitScale +cableheadxposition, 0 ,xmax2);
             points1.push(a1);
             speeds1.push(Vector3(0,0,0));
@@ -1180,7 +1117,7 @@ function onKeyDown(event){
               cable1i.visible = false;
               sceneGraph.add(cable1i);
             }
-            //Construction du câble 2
+            //Cable 2
             for(var i=0; i<nbmasses-1; i++){
               var cable2iGeometry = primitive.Cylinder( points2[i], points2[i+1], rcable, rcable );
               var cable2i = new THREE.Mesh( cable2iGeometry, MaterialRGB(0.4,0.9,1) );
@@ -1197,23 +1134,20 @@ function onKeyDown(event){
                 renderer: null,
                 controls: null
             };
-            //initEmptyScene(sceneThreeJs);
 
 
             const textureLoader = new THREE.TextureLoader();
 
-            //const groundGeometry = primitive.Quadrangle(Vector3(-4,0,-4),Vector3(-4,0,4),Vector3(4,0,4),Vector3(4,0,-4));
             var groundGeometry = primitive.Cube(Vector3(0,0.5,0), 1);
             const textureGround = textureLoader.load( 'pictures/Outer-Real-Space-Wallpapers.jpg' );
             const materialGround = new THREE.MeshLambertMaterial({ map: textureGround });
             const ground = new THREE.Mesh(groundGeometry,materialGround);
             ground.name="ground";
             ground.receiveShadow = false;
-            //sceneGraph.add(ground);
             sceneGraph.background = textureGround;
 
-            //Création du plan d'étoiles
-            const Lp = 400; // taille du plan
+            // Stars plan
+            const Lp = 400; // Size of the plan
             const floor = -1
             const floor2 = floor +0.01
             const planeGeometry = primitive.Quadrangle(Vector3(-Lp,floor,-Lp),Vector3(-Lp,floor,Lp),Vector3(Lp,floor,Lp),Vector3(Lp,floor,-Lp));
@@ -1224,7 +1158,6 @@ function onKeyDown(event){
               }
             }
             const planemat = new THREE.LineDashedMaterial({dashSize: 0.2, gapSize:1});
-            //planeGeometry.computeLineDistances();
             planeGeometry2.computeLineDistances();
             const plane2 = new THREE.Line( planeGeometry2, planemat );
             plane2.name = "plane2";
@@ -1260,9 +1193,6 @@ function onKeyDown(event){
             render();
 
 
-            //INSERER ICI L'ANIMATION
-
-
 
         }
 
@@ -1288,17 +1218,7 @@ function onKeyUp(event){
 
 
 
-
-
-
-
-///////////////////////////
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// FONCTIONS ANNEXES //
+// OTHER FONCTIONS //
 function onResize() {
     const width = window.innerWidth;
     const height = window.innerHeight;
@@ -1323,13 +1243,11 @@ function render() {
 }
 function animationLoop(sceneGraph) {
 
-    // Fonction JavaScript de demande d'image courante à afficher
     requestAnimationFrame(
 
-        // La fonction (dite de callback) recoit en paramètre le temps courant
         function(timeStamp){
-            animate(sceneGraph,timeStamp); // appel de notre fonction d'animation
-            animationLoop(sceneGraph); // relance une nouvelle demande de mise à jour
+            animate(sceneGraph,timeStamp); 
+            animationLoop(sceneGraph); 
         }
 
      );
@@ -1393,7 +1311,6 @@ function animate(sceneGraph, time) {
     }
     if(jumping2){
       lambdaf = 0;
-      //object.setRotationFromAxisAngle(Vector3(0,0,1), 0.5*(1-Math.exp(- (t-timestart2) ) ) );
       object.position.set(-cabletailxposition,0.03*Math.sin(3+15*t)+2*Math.sin(1*(t-timestart2)),0.03*Math.sin(3+18*t));
       points1[nbmasses-1] = Vector3(0, 0.03*Math.sin(3+15*t)+2*Math.sin(1*(t-timestart2)), 0.03*Math.sin(3+18*t) + xmax2);
       points2[nbmasses-1] = Vector3(0, 0.03*Math.sin(3+15*t)+2*Math.sin(1*(t-timestart2)), 0.03*Math.sin(3+18*t) - xmax2);
@@ -1541,7 +1458,6 @@ function animate(sceneGraph, time) {
 
 
     render();
-    //sceneThreeJs.renderer.render(sceneThreeJs.sceneGraph, sceneThreeJs.camera);
 }
 function initEmptyScene(sceneThreeJs) {
 
@@ -1556,6 +1472,4 @@ function initEmptyScene(sceneThreeJs) {
 
     sceneThreeJs.controls = new THREE.OrbitControls( sceneThreeJs.camera );
 
-    //window.addEventListener('resize', function(event){onResize(sceneThreeJs);}, false);
 }
-////////////////////////////////////////////////////////////////////////////////////////////////
