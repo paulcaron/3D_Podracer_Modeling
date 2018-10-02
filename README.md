@@ -12,6 +12,8 @@ Paul Caron and Antoine Guedon from **Ecole polytechnique**
 
 ## A few examples
 
-![Alt text](Pictures/Example2.png?raw=true "Example2")
 ![Alt text](Pictures/Example3.png?raw=true "Example3")
+
+![Alt text](Pictures/Example2.png?raw=true "Example2")
+
 ![Alt text](Pictures/Example1.png?raw=true "Example1")
