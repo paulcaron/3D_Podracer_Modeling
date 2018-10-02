@@ -1,7 +1,7 @@
 # Project
 
 This project was completed in the frame of Computer Science course INF473F by Marie-Paule Cani.
-It aims at developping a software solution to design 3D flying objects inspired by podraces.
+It aims at developping a software solution to design 3D flying objects inspired by podracers.
 
 The solution is developped in javascript using the THREE.JS library
 
