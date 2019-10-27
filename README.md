@@ -8,7 +8,7 @@ The solution is developped in javascript using the THREE.JS library
 ## Authors
 Paul Caron and Antoine Guedon from **Ecole polytechnique**
 
-*NB: The full tutorial describing the use of the softare is not provided yet and should be presented soon. However, an naive exploration of the product can be surprising...*
+*NB: The full tutorial describing the use of the softare is not provided yet and should be presented soon. However, a naive exploration of the product can be surprising...*
 
 ## A few examples
 
